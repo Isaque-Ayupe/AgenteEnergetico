@@ -1,0 +1,34 @@
+{
+  "decision": "execute",
+  "reason": "O comfort_score (51) está bem acima do limite mínimo de 40, indicando que o conforto dos ocupantes não será comprometido. A recomendação de 'adjust_lighting' com 'lighting_target: false' (desligar/diminuir luzes) é coerente com o 'peak_risk: true' no forecast e visa economia de energia. A urgência 'scheduled' é apropriada para uma ação de otimização de iluminação neste contexto. Assumindo que 'constraints_respected: true' significa que a ação é viável e não causará desconforto ou incoerência com o estado atual de ocupação e iluminação.",
+  "action_taken": {
+    "recommended_action": "adjust_lighting",
+    "lighting_target": false,
+    "ac_setpoint_target": null
+  },
+  "main_agent_input": {
+    "environment_id": "sala_101",
+    "timestamp": "2025-05-25T14:30:00-03:00",
+    "forecast": {
+      "baseline_avg_kwh": 2.425,
+      "confidence": "high",
+      "peak_risk": true,
+      "predicted_kwh_next_hour": 2.775
+    },
+    "comfort": {
+      "comfort_score": 51,
+      "comfort_violation": false,
+      "ideal_temp_celsius": 22,
+      "min_acceptable_setpoint": 28.88
+    },
+    "recommendation": {
+      "ac_setpoint_target": null,
+      "constraints_respected": true,
+      "estimated_saving_brl": 0.3538,
+      "lighting_target": false,
+      "recommended_action": "adjust_lighting",
+      "urgency": "scheduled"
+    },
+    "simulation_result": null
+  }
+}
