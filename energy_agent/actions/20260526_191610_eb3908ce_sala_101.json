@@ -1,0 +1,22 @@
+{
+  "decision": "hold",
+  "reason": "A recomendação não inclui uma avaliação de risco (risk_assessment é null), o que impede a verificação completa da consistência da ação, especialmente em relação à urgência declarada como 'scheduled'. Embora o conforto esteja dentro dos limites aceitáveis (comfort_score: 51), a ausência de informações sobre o risco impede a autorização para execução. A ação é considerada prematura até que uma avaliação de risco seja fornecida.",
+  "alternative_action": null,
+  "main_agent_input": {
+    "environment_id": "sala_101",
+    "timestamp": "2025-05-25T14:30:00-03:00",
+    "current_energy_kwh": 4.2,
+    "forecast_kwh_next_hour": 2.775,
+    "comfort_score": 51,
+    "comfort_violation": false,
+    "recommended_action": "adjust_lighting",
+    "estimated_saving_brl": 0.3538,
+    "action_details": {
+      "ac_setpoint_target": null,
+      "lighting_target": false
+    },
+    "simulation_results": null,
+    "risk_assessment": null,
+    "urgency": "scheduled"
+  }
+}
