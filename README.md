@@ -1,84 +1,170 @@
-# Sistema de Agentes de Controle Energético
+# Sistema de Agentes de Controle Energético (CrewAI + Django)
 
-Um sistema inteligente para otimização de consumo energético em edifícios (prédios administrativos, salas de aula, laboratórios e ambientes climatizados). O sistema utiliza uma arquitetura baseada em LLMs (Gemini 2.5 Pro) atuando como agentes autônomos, auxiliados por *skills* (ferramentas) implementadas em Python puro.
+Um sistema inteligente para otimização de consumo energético em edifícios (prédios administrativos, salas de aula, laboratórios e ambientes climatizados). O sistema utiliza a framework **CrewAI** para orquestrar agentes autônomos cooperativos e expõe a solução como uma API Web REST de resposta rápida construída em **Django**.
 
-## 🏗️ Arquitetura
+---
 
-O sistema é composto por duas entidades principais:
+## 🏗️ Arquitetura e Fluxo
 
-1.  **Agente Principal (`main_agent.py`)**: Analisa os dados de telemetria do ambiente e decide, autonomamente, quais *skills* invocar (via `function_calling`) para tomar uma decisão. Produz uma recomendação de ação energética e uma análise estruturada.
-2.  **Agente Juiz (`judge_agent.py`)**: Recebe a recomendação do Agente Principal e atua como uma camada de segurança e coerência. Ele decide se a ação deve ser executada, mantida em espera ou sobrescrita, garantindo que regras estritas (como limites de conforto térmico) sejam respeitadas. Por fim, persiste a decisão em disco para auditoria.
+O sistema conta com dois agentes que atuam de forma sequencial na orquestração:
 
-### 🛠️ Skills (Ferramentas)
+1.  **Energy Optimizer Specialist (`crew/agents.py`)**: Analisa os dados de telemetria do ambiente físico e executa as ferramentas (*skills*) em Python necessárias para gerar a melhor recomendação de setpoint de temperatura e controle de iluminação.
+2.  **Energy Control Operations Judge (`crew/agents.py`)**: Recebe a recomendação estruturada, valida contra restrições rígidas (garantindo que o conforto térmico mínimo seja mantido) e emite a decisão final de operação (`execute`, `hold` ou `override`). A resposta final é persistida em formato JSON na pasta `actions/` e retornada como um JSON HTTP.
 
-O Agente Principal tem acesso a quatro *skills* (funções Python sem uso de LLM) para basear suas decisões:
+### 🛠️ Skills (Ferramentas) do Agente Otimizador
 
-*   **Forecast Skill (`forecast_skill.py`)**: Prevê o consumo de energia da próxima hora analisando o histórico recente, aplicando ajustes sazonais (temperatura externa) e de calendário.
-*   **Comfort Skill (`comfort_skill.py`)**: Calcula um índice de conforto térmico PMV simplificado (0 a 100) considerando temperatura ideal da sala, umidade e ocupação.
-*   **Optimizer Skill (`optimizer_skill.py`)**: Baseado nas saídas de Forecast e Comfort, além de regras tarifárias e de funcionamento, recomenda a ação de melhor custo-benefício (ex: reduzir AC, desligar iluminação).
-*   **Simulation Skill (`simulation_skill.py`)**: Projeta o impacto financeiro e o risco de degradação de conforto da ação recomendada ao longo de um horizonte de tempo.
+O otimizador tem acesso às seguintes ferramentas de cálculo determinístico:
 
-## 🚀 Como Executar
+*   **Forecast Skill (`skills/forecast_skill.py`)**: Realiza previsão de consumo elétrico para a próxima hora com base no histórico das últimas 24 horas, ajustando por sazonalidade (temperatura externa) e eventos acadêmicos.
+*   **Comfort Skill (`skills/comfort_skill.py`)**: Avalia o nível de conforto térmico predial (de 0 a 100) e calcula os limites aceitáveis de desvio de setpoint.
+*   **Optimizer Skill (`skills/optimizer_skill.py`)**: Recomenda ações corretivas de baixo consumo energético com base na previsão e no conforto.
+*   **Simulation Skill (`skills/simulation_skill.py`)**: Projeta a economia e avalia se há risco de degradação térmica futura caso a ação proposta seja imediata ou de alto impacto.
 
-### Pré-requisitos
+---
 
-*   Python 3.11+
-*   Chave de API válida do Google Gemini.
-
-### 1. Instalação
-
-Navegue até o diretório do projeto e instale as dependências:
-
-```bash
-cd energy_agent
-pip install -r requirements.txt
-```
-
-### 2. Configuração
-
-O projeto usa o pacote `python-dotenv` para gerenciar variáveis de ambiente.
-Preencha sua chave de API no arquivo `.env` localizado na raiz da pasta `energy_agent`:
-
-```env
-GEMINI_API_KEY=sua_chave_da_api_gemini_aqui
-```
-
-### 3. Execução
-
-Para testar o fluxo end-to-end com um payload de dados fixo em uma sala de aula de exemplo, execute o ponto de entrada principal:
-
-```bash
-python main.py
-```
-
-Você verá no console:
-1.  A resposta estruturada do **Agente Principal** em JSON.
-2.  A avaliação final do **Agente Juiz** em JSON.
-3.  A confirmação de que a ação final foi salva na pasta `actions/`.
-
-## 📁 Estrutura de Pastas
+## 📁 Estrutura do Projeto
 
 ```
 energy_agent/
-├── .env                    # Variáveis de ambiente (API Key)
-├── requirements.txt        # Dependências do projeto
-├── main.py                 # Entrypoint para teste end-to-end
-├── actions/                # (Gerado em runtime) Registros das decisões do Juiz
-├── agents/
-│   ├── main_agent.py       # Lógica do Agente Principal (Tool Calling Loop)
-│   └── judge_agent.py      # Lógica do Agente Juiz e persistência
-├── schemas/
-│   ├── input_schema.py     # Validação de dados de entrada do ambiente
-│   └── output_schema.py    # Validação de JSONs de saída dos agentes
-└── skills/
-    ├── forecast_skill.py   # Skill de previsão de consumo
-    ├── comfort_skill.py    # Skill de cálculo de conforto térmico
-    ├── optimizer_skill.py  # Skill de otimização de ações
-    └── simulation_skill.py # Skill de simulação de cenário futuro
+├── manage.py               # Script de gerenciamento do Django
+├── core/                   # Configurações globais do Django (urls.py, settings.py)
+├── api/                    # App Django responsável pelos endpoints da API (views.py, urls.py)
+├── crew/                   # Módulo de agentes e tarefas CrewAI
+│   ├── agents.py           # Definição dos agentes e carregamento do LLM
+│   ├── tasks.py            # Definição das tarefas com schemas Pydantic
+│   ├── tools.py            # Wrappers de ferramentas para o CrewAI
+│   └── crew_runner.py      # Executor da orquestração e persistência
+├── schemas/                # Schemas de validação de dados
+│   ├── input_schema.py     # Validação de dados do ambiente
+│   └── output_schema.py    # Schemas Pydantic da saída estruturada
+├── skills/                 # Lógica matemática pura em Python (sem LLM)
+├── actions/                # Pasta gerada em runtime onde são salvas as decisões finais do juiz
+├── .env                    # Variáveis de ambiente contendo o token da API do Gemini
+└── requirements.txt        # Requisitos do projeto
 ```
 
-## ⚙️ Tecnologias Utilizadas
+---
 
-*   **Linguagem**: Python
-*   **LLM SDK**: `google-genai` (SDK Oficial do Google)
-*   **Modelo de IA**: `gemini-2.5-pro` (Configurado com `temperature=0` para saídas determinísticas).
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+
+*   Python 3.10 ou superior
+*   Chave de API do Google Gemini (`GEMINI_API_KEY`)
+
+### 1. Instalação de Dependências
+
+Crie um ambiente virtual, ative-o e instale os pacotes necessários:
+
+```bash
+# Se utilizar Windows Powershell:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Se utilizar Linux/MacOS:
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Instalar requisitos:
+pip install -r energy_agent/requirements.txt
+```
+
+### 2. Configurar Variáveis de Ambiente
+
+Crie um arquivo `.env` na pasta `energy_agent/` (ou edite o existente) e insira sua chave da API do Gemini:
+
+```env
+GEMINI_API_KEY=sua_chave_de_api_aqui
+```
+
+### 3. Execução Local via CLI (Modo de Teste)
+
+Para rodar uma execução offline simulando um ambiente estático através de dados de teste, execute:
+
+```bash
+python energy_agent/main.py
+```
+
+### 4. Executando o Servidor Django (API REST)
+
+Para inicializar o servidor de desenvolvimento Django localmente na porta 8000:
+
+```bash
+python energy_agent/manage.py runserver
+```
+
+---
+
+## 🔌 Documentação da API REST
+
+A API do sistema é stateless, não exige autenticação complexa para desenvolvimento e retorna respostas diretamente em formato JSON.
+
+### Endpoint: Otimizar Ambiente
+
+*   **URL**: `/api/optimize/`
+*   **Método**: `POST`
+*   **Headers**: `Content-Type: application/json`
+
+#### Exemplo de Payload (Corpo da Requisição JSON):
+
+```json
+{
+  "environment_id": "sala_101",
+  "environment_type": "classroom",
+  "timestamp": "2025-05-25T14:30:00-03:00",
+  "internal_temp_celsius": 27.5,
+  "external_temp_celsius": 32.0,
+  "humidity_percent": 68.0,
+  "occupancy_count": 35,
+  "energy_kwh_current_hour": 4.2,
+  "energy_kwh_last_24h": [
+    1.1, 0.9, 0.8, 0.7, 0.6, 0.8, 1.2, 2.1, 3.5, 4.0,
+    4.3, 4.1, 3.9, 4.2, 4.5, 4.3, 3.8, 3.2, 2.5, 2.0,
+    1.8, 1.5, 1.3, 1.1
+  ],
+  "ac_active": true,
+  "lighting_active": true,
+  "ac_setpoint_celsius": 24.0,
+  "tariff_current": 0.85,
+  "tariff_peak": true,
+  "calendar_event": "class",
+  "operating_hours": true
+}
+```
+
+#### Exemplo de Resposta de Sucesso (`200 OK`):
+
+```json
+{
+  "agent": "JudgeAgent",
+  "model": "gemini-2.5-flash",
+  "timestamp": "2025-05-25T14:35:00-03:00",
+  "environment_id": "sala_101",
+  "action_id": "f1a2b3c4-d5e6-7890-1234-567890abcdef",
+  "decision": "execute",
+  "action_taken": {
+    "recommended_action": "adjust_lighting",
+    "ac_setpoint_target": 24.0,
+    "lighting_target": false
+  },
+  "justification": "A recomendação de desligar a iluminação é aprovada pois o conforto térmico está mantido (score = 51) e o horário é de pico de tarifa...",
+  "main_agent_recommendation_accepted": true,
+  "override_reason": "",
+  "estimated_impact": {
+    "estimated_saving_brl": 0.3538,
+    "comfort_risk_detected": false
+  },
+  "main_agent_input": {
+     "...": "dados originais analisados pelo otimizador"
+  },
+  "_saved_filepath": "C:\\caminho\\do\\arquivo\\salvo.json"
+}
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+*   **Django 6.x**: Framework backend python utilizada para gerenciar as rotas e requisições HTTP REST.
+*   **CrewAI 1.14.x**: Orquestrador agêntico que realiza o fluxo sequencial de pensamento e ferramentas.
+*   **Google Gemini (gemini-2.5-flash)**: LLM principal para inferência, raciocínio e estruturação de respostas.

@@ -1,2 +1,5 @@
 google-genai>=0.40.0
 python-dotenv>=1.0.0
+crewai>=0.28.0
+langchain-google-genai>=1.0.0
+django>=5.0.0

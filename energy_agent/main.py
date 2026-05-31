@@ -1,32 +1,26 @@
 """
-Ponto de entrada do Sistema de Controle Energético.
+Ponto de entrada do Sistema de Controle Energético com CrewAI.
 
-Este módulo inicializa e executa o pipeline completo:
-1. Agente Principal analisa os dados do ambiente e gera recomendação
-2. Agente Juiz valida a recomendação e decide a ação final
-3. Resultado é salvo em disco para rastreabilidade
+Este módulo inicializa e executa o pipeline completo utilizando a orquestração do CrewAI:
+1. Otimizador analisa e invoca ferramentas de previsão, conforto e simulação.
+2. Juiz valida o resultado e define a decisão operacional final.
+3. A decisão enriquecida é salva em disco.
 """
 
 import json
 import sys
 from pathlib import Path
-
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente do arquivo .env na raiz do projeto
+# Carregar variáveis de ambiente do arquivo .env
 load_dotenv(Path(__file__).resolve().parent / '.env')
 
-from agents.main_agent import MainAgent
-from agents.judge_agent import JudgeAgent   
+from crew.crew_runner import run_energy_crew
 
 
 def main():
     """
-    Função principal que executa o pipeline de controle energético.
-
-    Utiliza dados de exemplo de uma sala de aula (sala_101) para
-    demonstrar o fluxo completo: análise pelo Agente Principal,
-    validação pelo Agente Juiz e persistência da decisão.
+    Função principal que executa o pipeline de controle energético com CrewAI.
     """
     sample_input = {
         'environment_id': 'sala_101',
@@ -52,27 +46,25 @@ def main():
     }
 
     print('=' * 60)
-    print('SISTEMA DE CONTROLE ENERGÉTICO')
+    print('SISTEMA DE CONTROLE ENERGÉTICO (CREWAI)')
     print('=' * 60)
 
-    # Etapa 1: Agente Principal
-    print('\n[1/3] Executando Agente Principal...')
-    main_agent = MainAgent()
-    main_output = main_agent.run(sample_input)
-    print('\n--- MainAgentOutput ---')
-    print(json.dumps(main_output, indent=2, ensure_ascii=False))
-
-    # Etapa 2: Agente Juiz
-    print('\n[2/3] Executando Agente Juiz...')
-    judge_agent = JudgeAgent()
-    judge_output = judge_agent.run(main_output)
-    print('\n--- JudgeAgentOutput ---')
-    print(json.dumps(judge_output, indent=2, ensure_ascii=False))
-
-    # Etapa 3: Confirmação de salvamento
-    print('\n[3/3] Ação registrada com sucesso!')
-    print(f'Arquivo salvo em: {judge_output.get("_saved_filepath", "N/A")}')
-    print('\n' + '=' * 60)
+    print('\nExecutando a Crew de Otimização e Validação...')
+    try:
+        final_output = run_energy_crew(sample_input)
+        
+        print('\n' + '=' * 60)
+        print('DECISÃO FINAL DO JUIZ')
+        print('=' * 60)
+        print(json.dumps(final_output, indent=2, ensure_ascii=False))
+        print('=' * 60)
+        print(f"Decisão: {final_output.get('decision')}")
+        print(f"Arquivo salvo: {final_output.get('_saved_filepath')}")
+        print('=' * 60)
+    except Exception as e:
+        print(f"\nErro durante a execução: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == '__main__':
