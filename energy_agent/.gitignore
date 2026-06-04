@@ -1,3 +1,30 @@
+# Variáveis de ambiente e segredos
 .env
+
+# Decisões do sistema de agentes
 energy_agent/actions/*.json
-__pycache__/    
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Banco de dados local
+*.sqlite3
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+
+# Distribuição
+*.egg-info/
+dist/
+build/

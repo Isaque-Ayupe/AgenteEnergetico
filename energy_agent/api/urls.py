@@ -9,4 +9,9 @@ urlpatterns = [
     path('agents/toggle', views.toggle_agent_control, name='toggle_agent_control'),
     path('error-simulation', views.error_simulation, name='error_simulation'),
     path('optimize/', views.optimize_environment, name='optimize_environment'),
+    
+    # Dynamic creation routes (no fixtures)
+    path('agents', views.create_agent, name='create_agent'),
+    path('alerts', views.create_alert, name='create_alert'),
+    path('reports', views.create_report, name='create_report'),
 ]

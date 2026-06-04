@@ -81,22 +81,22 @@ def run_comfort(input_data: dict) -> dict:
         # --- Verificar violação de conforto ---
         comfort_violation: bool = score < COMFORT_THRESHOLD
 
-        # --- Calcular setpoint mínimo aceitável ---
-        # O setpoint mínimo aceitável é o desvio máximo que mantém score >= 40
+        # --- Calcular limite máximo aceitável de setpoint ---
+        # O sistema pode elevar o setpoint até o ponto onde o score ainda se mantém >= 40.
         # score = 100 - (delta_t * 8) - humidity_penalty - occupancy_penalty >= 40
-        # delta_t <= (100 - 40 - humidity_penalty - occupancy_penalty) / 8
+        # => delta_t <= (60 - humidity_penalty - occupancy_penalty) / 8
         max_acceptable_delta: float = (
             100.0 - COMFORT_THRESHOLD - humidity_penalty - occupancy_penalty
         ) / TEMP_WEIGHT
         max_acceptable_delta = max(max_acceptable_delta, 0.0)
 
-        # O setpoint mínimo aceitável é o limite superior do intervalo
-        min_acceptable_setpoint: float = round(ideal_temp + max_acceptable_delta, 2)
+        # max_setpoint_celsius: setpoint máximo que ainda preserva conforto mínimo
+        max_setpoint_celsius: float = round(ideal_temp + max_acceptable_delta, 2)
 
         return {
             "comfort_score": round(score, 2),
             "comfort_violation": comfort_violation,
-            "min_acceptable_setpoint": min_acceptable_setpoint,
+            "max_setpoint_celsius": max_setpoint_celsius,   # renomeado de min_acceptable_setpoint
             "ideal_temp_celsius": ideal_temp,
         }
 
@@ -104,7 +104,7 @@ def run_comfort(input_data: dict) -> dict:
         return {
             "comfort_score": 0.0,
             "comfort_violation": True,
-            "min_acceptable_setpoint": 23.0,
+            "max_setpoint_celsius": 23.0,
             "ideal_temp_celsius": 23.0,
             "error": f"Erro na avaliação de conforto: {str(e)}",
         }

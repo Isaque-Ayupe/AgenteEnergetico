@@ -1,6 +1,15 @@
-google-genai>=0.40.0
-python-dotenv>=1.0.0
-crewai>=0.28.0
-langchain-google-genai>=1.0.0
-django>=5.0.0
-django-cors-headers>=4.0.0
+# Framework Web
+Django==6.0.5
+django-cors-headers==4.7.0
+
+# Banco de dados PostgreSQL
+psycopg2-binary==2.9.10
+psycopg==3.3.4
+
+# Agentes e LLM
+crewai==1.14.0
+langchain-google-genai==2.1.5
+google-genai==1.16.0
+
+# Variáveis de ambiente
+python-dotenv==1.1.0

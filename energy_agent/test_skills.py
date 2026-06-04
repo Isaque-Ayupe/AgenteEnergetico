@@ -55,6 +55,7 @@ print("\n=== COMFORT ===")
 print(json.dumps(comfort, indent=2))
 assert "comfort_score" in comfort
 assert "comfort_violation" in comfort
+assert "max_setpoint_celsius" in comfort
 assert comfort["ideal_temp_celsius"] == 22.0  # classroom
 print("[OK] comfort_skill validado")
 

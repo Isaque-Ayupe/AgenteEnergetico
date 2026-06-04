@@ -49,8 +49,9 @@ energy_agent/
 
 ### Pré-requisitos
 
-*   Python 3.10 ou superior
-*   Chave de API do Google Gemini (`GEMINI_API_KEY`)
+- Python 3.10 ou superior
+- PostgreSQL 14 ou superior (servidor rodando localmente ou remoto)
+- Chave de API do Google Gemini (`GEMINI_API_KEY`)
 
 ### 1. Instalação de Dependências
 
@@ -71,13 +72,30 @@ pip install -r energy_agent/requirements.txt
 
 ### 2. Configurar Variáveis de Ambiente
 
-Crie um arquivo `.env` na pasta `energy_agent/` (ou edite o existente) e insira sua chave da API do Gemini:
+Copie o arquivo de exemplo e preencha com seus valores:
 
-```env
-GEMINI_API_KEY=sua_chave_de_api_aqui
+```bash
+cp energy_agent/.env.example energy_agent/.env
 ```
 
-### 3. Execução Local via CLI (Modo de Teste)
+Edite `energy_agent/.env` e preencha obrigatoriamente:
+- `DJANGO_SECRET_KEY`: gere uma chave segura com `python -c "import secrets; print(secrets.token_urlsafe(50))"`
+- `GEMINI_API_KEY`: sua chave da API do Google Gemini
+- `DB_PASSWORD`: senha do usuário PostgreSQL
+
+### 3. Inicializar o Banco de Dados
+
+Execute o script de inicialização para criar o banco de dados caso não exista e em seguida aplique as migrações Django:
+
+```bash
+# Cria o banco de dados se não existir
+python energy_agent/core/db_init.py
+
+# Aplica as migrações Django (cria as tabelas)
+python energy_agent/manage.py migrate
+```
+
+### 4. Execução Local via CLI (Modo de Teste)
 
 Para rodar uma execução offline simulando um ambiente estático através de dados de teste, execute:
 
@@ -85,7 +103,7 @@ Para rodar uma execução offline simulando um ambiente estático através de da
 python energy_agent/main.py
 ```
 
-### 4. Executando o Servidor Django (API REST)
+### 5. Executando o Servidor Django (API REST)
 
 Para inicializar o servidor de desenvolvimento Django localmente na porta 8000:
 

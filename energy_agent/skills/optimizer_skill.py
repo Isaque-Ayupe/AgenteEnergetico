@@ -75,13 +75,13 @@ def run_optimizer(input_data: dict) -> dict:
 
         # --- Lógica de decisão por prioridade ---
 
-        # 1. Violação de conforto: priorizar conforto, não reduzir AC
+        # 1. Violação de conforto: preservar conforto, não alterar AC
         if comfort_violation:
             recommended_action = "no_action"
             urgency = "none"
             constraints_respected = True
 
-        # 2. Fora do horário de operação: desligar equipamentos
+        # 2. Fora do horário de operação: desligar equipamentos imediatamente
         elif not operating_hours:
             recommended_action = "shutdown_equipment"
             urgency = "immediate"
@@ -89,14 +89,14 @@ def run_optimizer(input_data: dict) -> dict:
             lighting_target = False
             constraints_respected = True
 
-        # 3. Risco de pico com conforto adequado (≥ 60): ajustar AC
+        # 3. Risco de pico com conforto alto (>= 60): ajustar AC — ação agendada
         elif peak_risk and comfort_score >= 60.0:
             recommended_action = "adjust_ac"
-            ac_setpoint_target = ac_setpoint - 1.0
+            ac_setpoint_target = round(ac_setpoint + 1.0, 1)  # aumenta setpoint em 1°C para economizar
             urgency = "scheduled"
             constraints_respected = True
 
-        # 4. Risco de pico com conforto baixo (< 60): ajustar iluminação
+        # 4. Risco de pico com conforto moderado (< 60): ajustar iluminação — ação agendada
         elif peak_risk and comfort_score < 60.0:
             if lighting_active:
                 recommended_action = "adjust_lighting"
@@ -104,7 +104,6 @@ def run_optimizer(input_data: dict) -> dict:
                 urgency = "scheduled"
                 constraints_respected = True
             else:
-                # Iluminação já desligada, sem ação possível sem violar conforto
                 recommended_action = "no_action"
                 urgency = "none"
                 constraints_respected = True

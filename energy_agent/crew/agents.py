@@ -7,8 +7,10 @@ from crew.tools import forecast_skill, comfort_skill, optimizer_skill, simulatio
 def get_llm() -> LLM:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY não configurada nas variáveis de ambiente.")
-    # Usando gemini-2.5-flash devido a limitações de cota do gemini-2.5-pro na conta do usuário
+        raise EnvironmentError(
+            "GEMINI_API_KEY não encontrada. "
+            "Defina esta variável no arquivo .env antes de iniciar o servidor."
+        )
     return LLM(
         model="gemini/gemini-2.5-flash",
         api_key=api_key,

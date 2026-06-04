@@ -13,6 +13,8 @@ from pydantic import BaseModel, Field
 # Listas de campos obrigatórios (Legado)
 # ==========================================
 
+# Nota: comfort_skill retorna 'max_setpoint_celsius' (anteriormente 'min_acceptable_setpoint')
+# Representa o limite superior de setpoint que preserva comfort_score >= 40
 MAIN_AGENT_REQUIRED_FIELDS: List[str] = [
     "agent",
     "model",

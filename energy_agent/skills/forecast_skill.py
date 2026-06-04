@@ -54,11 +54,10 @@ def run_forecast(input_data: dict) -> dict:
         predicted_kwh: float = baseline_avg_kwh
 
         # --- Ajuste sazonal por temperatura ---
-        # Acima de 25°C: +0.05 kWh por grau excedente
-        # Abaixo de 25°C: -0.05 kWh por grau abaixo (ajuste simétrico)
-        if external_temp > 25.0:
-            delta_temp: float = external_temp - 25.0
-            predicted_kwh += delta_temp * 0.05
+        # Acima de 25°C: +0.05 kWh por grau excedente (maior carga de refrigeração)
+        # Abaixo de 25°C: -0.05 kWh por grau abaixo (menor carga de refrigeração)
+        delta_temp: float = external_temp - 25.0
+        predicted_kwh += delta_temp * 0.05
 
         # --- Ajuste por evento do calendário ---
         if calendar_event is not None:
