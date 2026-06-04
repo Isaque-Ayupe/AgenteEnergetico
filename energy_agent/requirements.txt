@@ -12,4 +12,4 @@ langchain-google-genai==2.1.5
 google-genai==1.16.0
 
 # Variáveis de ambiente
-python-dotenv==1.1.0
+python-dotenv==1.1.1

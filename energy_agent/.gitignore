@@ -2,7 +2,7 @@
 .env
 
 # Decisões do sistema de agentes
-energy_agent/actions/*.json
+energy_agent/actions/*
 
 # Cache Python
 __pycache__/

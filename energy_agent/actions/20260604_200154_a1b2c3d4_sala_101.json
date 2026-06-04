@@ -1,0 +1,68 @@
+{
+  "agent": "JudgeAgent",
+  "model": "gemini-2.5-flash",
+  "timestamp": "2025-05-25T14:30:00-03:00",
+  "environment_id": "sala_101",
+  "action_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+  "decision": "execute",
+  "action_taken": {
+    "recommended_action": "no_action",
+    "ac_setpoint_target": 24.0,
+    "lighting_target": true
+  },
+  "justification": "A recomendação de 'no_action' é validada pois o comfort_score atual é 51, o que está acima do limite mínimo de 40. Não há proposta de alteração no setpoint do AC que viole o max_setpoint_celsius de 28.88°C. A urgência é 'none', e a análise indica que o conforto está dentro dos limites aceitáveis, sem oportunidade imediata de economia significativa que justifique uma ação. A climatização mínima é preservada, e a recomendação é coerente com o estado do ambiente em horário de operação com ocupantes ativos.",
+  "main_agent_recommendation_accepted": true,
+  "override_reason": "",
+  "estimated_impact": {
+    "estimated_saving_brl": 0.0,
+    "comfort_risk_detected": false
+  },
+  "main_agent_input": {
+    "agent": "EnergyOptimizerAgent",
+    "model": "gemini-2.5-flash",
+    "timestamp": "2025-05-25T14:30:00-03:00",
+    "environment_id": "sala_101",
+    "skills_invoked": [
+      "forecast_skill",
+      "comfort_skill",
+      "optimizer_skill"
+    ],
+    "analysis": "A análise do ambiente \"sala_101\" para o timestamp \"2025-05-25T14:30:00-03:00\" foi realizada com base nos dados fornecidos. A previsão de consumo de energia para a próxima hora é de 2.775 kWh, com alta confiança e risco de pico de tarifa. O conforto térmico atual, com temperatura interna de 27.5°C e umidade de 68%, resultou em um comfort_score de 51, indicando que não há violação de conforto, e o setpoint máximo aceitável é de 28.88°C. O otimizador de energia, considerando os resultados de previsão e conforto, bem como as condições atuais (AC ativo em 24°C, iluminação ativa, horário de operação e pico de tarifa), recomendou \"no_action\". Isso se deve ao fato de que o conforto está dentro dos limites aceitáveis e não há oportunidade imediata de economia significativa sem comprometer o conforto. A urgência da ação é \"none\", o que significa que nenhuma simulação adicional é necessária neste momento. As restrições de conforto foram respeitadas.",
+    "recommendation": {
+      "recommended_action": "no_action",
+      "ac_setpoint_target": null,
+      "lighting_target": null,
+      "urgency": "none",
+      "estimated_saving_brl": 0.0,
+      "constraints_respected": true
+    },
+    "skills_output": {
+      "optimizer": {
+        "optimizer_skill_response": {
+          "lighting_target": null,
+          "recommended_action": "no_action",
+          "urgency": "none",
+          "constraints_respected": true,
+          "estimated_saving_brl": 0,
+          "ac_setpoint_target": null
+        }
+      },
+      "comfort": {
+        "comfort_skill_response": {
+          "max_setpoint_celsius": 28.88,
+          "ideal_temp_celsius": 22,
+          "comfort_violation": false,
+          "comfort_score": 51
+        }
+      },
+      "forecast": {
+        "forecast_skill_response": {
+          "predicted_kwh_next_hour": 2.775,
+          "confidence": "high",
+          "baseline_avg_kwh": 2.425,
+          "peak_risk": true
+        }
+      }
+    }
+  }
+}

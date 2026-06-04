@@ -55,7 +55,21 @@ energy_agent/
 
 ### 1. Instalação de Dependências
 
-Crie um ambiente virtual, ative-o e instale os pacotes necessários:
+> [!WARNING]
+> Evite utilizar o Python 3.14 (ou superior pré-lançamento), pois bibliotecas compiladas como o `pydantic-core` não possuem pacotes binários estáveis pré-compilados para essa versão ainda. Recomenda-se utilizar o **Python 3.13** (ou inferior).
+
+Se você tiver a ferramenta `uv` instalada (recomendado):
+
+```bash
+# Criar o ambiente virtual com Python 3.13
+uv venv .venv --python 3.13
+.\.venv\Scripts\Activate.ps1
+
+# Instalar requisitos com o uv (muito mais rápido)
+uv pip install -r energy_agent/requirements.txt
+```
+
+Caso contrário, utilizando o `python` tradicional (certifique-se de que é a versão 3.13):
 
 ```bash
 # Se utilizar Windows Powershell:
