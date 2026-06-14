@@ -10,8 +10,13 @@ urlpatterns = [
     path('error-simulation', views.error_simulation, name='error_simulation'),
     path('optimize/', views.optimize_environment, name='optimize_environment'),
     
+    # Anomalies CRUD
+    path('anomalies', views.list_anomalies, name='list_anomalies'),
+    path('anomalies/<str:anomaly_id>', views.anomaly_detail, name='anomaly_detail'),
+
     # Dynamic creation routes (no fixtures)
     path('agents', views.create_agent, name='create_agent'),
     path('alerts', views.create_alert, name='create_alert'),
     path('reports', views.create_report, name='create_report'),
 ]
+

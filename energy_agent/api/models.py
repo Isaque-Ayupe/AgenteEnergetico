@@ -141,3 +141,50 @@ class Report(models.Model):
 
     def __str__(self) -> str:
         return f"{self.report_type} ({self.date_generated})"
+
+
+class Anomaly(models.Model):
+    """Registro persistente de anomalia real gerada no sistema."""
+
+    class Severity(models.TextChoices):
+        LOW = 'low', 'Baixa'
+        MEDIUM = 'medium', 'Média'
+        HIGH = 'high', 'Alta'
+        CRITICAL = 'critical', 'Crítica'
+
+    class Status(models.TextChoices):
+        ACTIVE = 'active', 'Ativa'
+        RESOLVED = 'resolved', 'Resolvida'
+        DISMISSED = 'dismissed', 'Descartada'
+
+    anomaly_id = models.CharField(max_length=64, unique=True)
+    anomaly_type = models.CharField(max_length=128)
+    zone = models.ForeignKey(
+        Zone, on_delete=models.SET_NULL, null=True, blank=True, related_name='anomalies'
+    )
+    severity = models.CharField(
+        max_length=16, choices=Severity.choices, default=Severity.HIGH
+    )
+    status = models.CharField(
+        max_length=16, choices=Status.choices, default=Status.ACTIVE
+    )
+    notes = models.TextField(blank=True, default='')
+    diagnostic = models.TextField(blank=True, default='')
+    action_taken = models.TextField(blank=True, default='')
+    savings_impact = models.TextField(blank=True, default='')
+    alert = models.ForeignKey(
+        Alert, on_delete=models.SET_NULL, null=True, blank=True, related_name='anomaly_records'
+    )
+    zone_snapshot_before = models.JSONField(default=dict, blank=True)
+    zone_snapshot_after = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'api_anomaly'
+        ordering = ['-created_at']
+        verbose_name_plural = 'anomalies'
+
+    def __str__(self) -> str:
+        zone_name = self.zone.name if self.zone else 'N/A'
+        return f"[{self.severity.upper()}] {self.anomaly_type} — {zone_name}"
